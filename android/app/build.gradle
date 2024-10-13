@@ -1,0 +1,62 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.10' // Ensure you have the latest version
+    }
+}
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.t"
+    compileSdk = flutter.compileSdkVersion
+    
+    ndkVersion "26.1.10909125"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "com.t"
+        minSdkVersion 23 // Update this from 21 to 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    // Add Firebase SDK dependencies here
+    implementation platform('com.google.firebase:firebase-bom:32.1.1')  // Firebase BOM for version management
+    implementation 'com.google.firebase:firebase-auth'                  // Firebase Authentication
+    implementation 'com.google.firebase:firebase-firestore'             // Firebase Firestore for database
+}
+
+// Add Google Services classpath here
+
+
+// Apply the Google Services plugin at the bottom (this initializes Firebase)
+apply plugin: 'com.google.gms.google-services'

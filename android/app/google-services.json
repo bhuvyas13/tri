@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "83156717699",
+    "project_id": "tri13-c59c1",
+    "storage_bucket": "tri13-c59c1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83156717699:android:19389d7e5b4198b674cbb6",
+        "android_client_info": {
+          "package_name": "com.t"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoln9S3Bxwj7exPWEZXwQxOribe_wqW7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
