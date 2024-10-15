@@ -25,6 +25,7 @@ class LoginPageState extends State<LoginPage> {
   int currentTranslationIndex = 0;
   bool showErrorMessages = false;
   bool isLogin = true; // Flag to toggle between login and signup
+  bool keepMeLoggedIn = false; // State for "Keep Me Logged In" checkbox
 
   @override
   void initState() {
@@ -61,6 +62,13 @@ class LoginPageState extends State<LoginPage> {
     }
 
     try {
+      // Set persistence based on the "Keep Me Logged In" checkbox
+      if (keepMeLoggedIn) {
+        await FirebaseAuth.instance.setPersistence(Persistence.LOCAL); // Session persists across browser restarts
+      } else {
+        await FirebaseAuth.instance.setPersistence(Persistence.SESSION); // Session ends when browser closes
+      }
+
       UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
       User? user = userCredential.user;
 
@@ -68,7 +76,12 @@ class LoginPageState extends State<LoginPage> {
         await user.sendEmailVerification();
         showErrorDialog("Please verify your email.");
       } else {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+        // Redirect to home page and clear navigation stack to prevent going back to login page
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (Route<dynamic> route) => false, // Remove all previous routes
+        );
       }
     } catch (e) {
       showErrorDialog(e.toString());
@@ -89,7 +102,12 @@ class LoginPageState extends State<LoginPage> {
 
     try {
       await auth.createUserWithEmailAndPassword(email: email, password: password);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+      // Redirect to home page and clear navigation stack to prevent going back to login page
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
       showErrorDialog(e.toString());
     }
@@ -231,6 +249,17 @@ class LoginPageState extends State<LoginPage> {
                   ],
                 ),
 
+              // "Keep Me Logged In" Checkbox
+              CheckboxListTile(
+                title: const Text("Keep Me Logged In"),
+                value: keepMeLoggedIn,
+                onChanged: (bool? value) {
+                  setState(() {
+                    keepMeLoggedIn = value ?? false;
+                  });
+                },
+              ),
+              
               // Log In or Sign Up Button
               ElevatedButton(
                 onPressed: isLogin ? login : signUp,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth for logout
 import 'package:tri/order_history_page.dart'; // Ensure this path is correct
 import 'package:tri/about_us.dart'; // Ensure this path is correct
 import 'package:tri/favourites_page.dart'; // Ensure this path is correct
@@ -15,12 +16,53 @@ class ProfilePage extends StatefulWidget {
 
 class ProfilePageState extends State<ProfilePage> {
   final int _currentIndex = 2; // Highlight Profile icon
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _confirmLogout() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                logout();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> logout() async {
+    // Perform Firebase sign out
+    await FirebaseAuth.instance.signOut();
+
+    // Navigate to the LogoutPage after signing out
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LogoutPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    User? user = _auth.currentUser; // Get current logged-in user
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Page'),
+        title: const Text('Profile Page'),
       ),
       body: Center(
         child: Column(
@@ -36,55 +78,50 @@ class ProfilePageState extends State<ProfilePage> {
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
-              'Bhuvya Shukla',
-              style: TextStyle(
+              user?.displayName ?? 'User', // Display user's name if available
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              '+91 8628030194',
-              style: TextStyle(color: Colors.grey),
+              user?.phoneNumber ?? 'No Phone Number', // Display phone number if available
+              style: const TextStyle(color: Colors.grey),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Navigation ListTiles
             ListTile(
-              title: Text('Order History'),
+              title: const Text('Order History'),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => OrderHistoryPage()),
+                  MaterialPageRoute(builder: (context) => const OrderHistoryPage()),
                 );
               },
             ),
             ListTile(
-              title: Text('About Us'),
+              title: const Text('About Us'),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AboutUsPage()),
+                  MaterialPageRoute(builder: (context) => const AboutUsPage()),
                 );
               },
             ),
             ListTile(
-              title: Text('Help'),
+              title: const Text('Help'),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HelpPage()),
+                  MaterialPageRoute(builder: (context) => const HelpPage()),
                 );
               },
             ),
             ListTile(
-              title: Text('Log Out'),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LogoutPage()),
-                );
-              },
+              title: const Text('Log Out'),
+              onTap: _confirmLogout, // Call the confirmation dialog
             ),
           ],
         ),
@@ -110,13 +147,13 @@ class ProfilePageState extends State<ProfilePage> {
             case 0:
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => FavouritesPage()),
+                MaterialPageRoute(builder: (context) => const FavouritesPage()),
               );
               break;
             case 1:
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomePage()),
+                MaterialPageRoute(builder: (context) => const HomePage()),
               );
               break;
             case 2:

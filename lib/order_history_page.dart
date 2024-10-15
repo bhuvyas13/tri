@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class OrderHistoryPage extends StatelessWidget {
   const OrderHistoryPage({super.key});
@@ -10,6 +11,12 @@ class OrderHistoryPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton( // Adding a back button
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context); // Go back to the previous page (Profile Page)
+          },
+        ),
         title: const Text(
           'Order History',
           style: TextStyle(
@@ -22,36 +29,36 @@ class OrderHistoryPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: const [
+          children: [
             OrderCard(
               image: 'assets/chocolate_cake.png',
               title: 'Chocolate Cake',
               price: '₹500',
-              date: 'Today',
+              orderDate: DateTime.now(), // Today
             ),
             OrderCard(
               image: 'assets/chicken_tikka.png',
               title: 'Chicken Tikka',
               price: '₹260',
-              date: 'Yesterday',
+              orderDate: DateTime.now().subtract(const Duration(days: 1)), // Yesterday
             ),
             OrderCard(
               image: 'assets/red_sauce_pasta.png',
               title: 'Red Sauce Pasta',
               price: '₹180',
-              date: '03.09.24',
+              orderDate: DateTime(2024, 9, 3), // Specific date
             ),
             OrderCard(
               image: 'assets/chicken_tikka.png',
               title: 'Chicken Tikka',
               price: '₹260',
-              date: '04.09.24',
+              orderDate: DateTime(2024, 9, 4),
             ),
             OrderCard(
               image: 'assets/chocolate_cake.png',
               title: 'Chocolate Cake',
               price: '₹500',
-              date: '05.09.24',
+              orderDate: DateTime(2024, 9, 5),
             ),
           ],
         ),
@@ -64,15 +71,29 @@ class OrderCard extends StatelessWidget {
   final String image;
   final String title;
   final String price;
-  final String date;
+  final DateTime orderDate;
 
   const OrderCard({
     super.key,
     required this.image,
     required this.title,
     required this.price,
-    required this.date,
+    required this.orderDate,
   });
+
+  // Function to format the order date as "Today," "Yesterday," or a specific date
+  String getFormattedDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date).inDays;
+
+    if (difference == 0) {
+      return 'Today';
+    } else if (difference == 1) {
+      return 'Yesterday';
+    } else {
+      return DateFormat('dd.MM.yy').format(date);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,26 +112,18 @@ class OrderCard extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align title and date on opposite sides
           children: [
             Text(
-              price,
+              title,
               style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4.0),
             Text(
-              date,
+              getFormattedDate(orderDate),
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -118,11 +131,12 @@ class OrderCard extends StatelessWidget {
             ),
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.more_vert),
-          onPressed: () {
-            // Add action when more button is clicked
-          },
+        subtitle: Text(
+          price,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+          ),
         ),
       ),
     );

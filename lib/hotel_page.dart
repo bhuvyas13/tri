@@ -44,12 +44,12 @@ class HotelPageState extends State<HotelPage> {
           children: [
             Expanded(
               child: Container(
-                margin: EdgeInsets.only(right: 10), // Space between search and cart
+                margin: const EdgeInsets.only(right: 10), // Space between search and cart
                 child: TextField(
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                     hintText: 'Search',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -61,11 +61,11 @@ class HotelPageState extends State<HotelPage> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.shopping_cart, color: Colors.black),
+              icon: const Icon(Icons.shopping_cart, color: Colors.black),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CartPage()),
+                  MaterialPageRoute(builder: (context) => const CartPage()),
                 );
               },
             ),
@@ -92,19 +92,19 @@ class HotelPageState extends State<HotelPage> {
                   imageUrl: 'assets/red_sauce_pasta.png',
                   name: 'Red Sauce Pasta',
                   price: '₹180',
-                  likes: '123',
+                  initialLikes: 123, // Pass initial likes as int
                 ),
                 HotelMenuItem(
                   imageUrl: 'assets/chicken_tikka.png',
                   name: 'Chicken Tikka',
                   price: '₹260',
-                  likes: '18',
+                  initialLikes: 18,
                 ),
                 HotelMenuItem(
                   imageUrl: 'assets/chocolate_cake.png',
                   name: 'Chocolate Cake',
                   price: '₹500',
-                  likes: '250',
+                  initialLikes: 250,
                 ),
               ],
             ),
@@ -133,18 +133,19 @@ class HotelPageState extends State<HotelPage> {
   }
 }
 
-// HotelMenuItem class with quantity buttons
+// HotelMenuItem class with corrected button sizes and alignment
 class HotelMenuItem extends StatefulWidget {
   final String imageUrl;
   final String name;
   final String price;
-  final String likes;
+  final int initialLikes;
 
-  const HotelMenuItem({super.key, 
+  const HotelMenuItem({
+    super.key, 
     required this.imageUrl,
     required this.name,
     required this.price,
-    required this.likes,
+    required this.initialLikes,
   });
 
   @override
@@ -153,72 +154,121 @@ class HotelMenuItem extends StatefulWidget {
 
 class HotelMenuItemState extends State<HotelMenuItem> {
   int _quantity = 1; // Default quantity
+  bool _isLiked = false; // Track like state
+  late int _likes; // Track number of likes
+
+  @override
+  void initState() {
+    super.initState();
+    _likes = widget.initialLikes; // Initialize likes with the passed value
+  }
+
+  // Method to toggle like status
+  void _toggleLike() {
+    setState(() {
+      _isLiked = !_isLiked; // Toggle the liked state
+      _isLiked ? _likes++ : _likes--; // Increase or decrease like count
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items at the top
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              widget.imageUrl,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+          // Stack to position the image and the buttons
+          Stack(
+            children: [
+              // Dish image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  widget.imageUrl,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              // Positioned Row for quantity control buttons (+ and -) overlapping the image
+              Positioned(
+                bottom: -10, // Adjusted positioning for better alignment
+                left: 5, // Align it better under the image
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green, // Background color of the buttons
+                    borderRadius: BorderRadius.circular(5), // Adjusted for smaller corner radius
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 0.2, vertical: 0.4), // Reduced padding for smaller size
+                  child: Row(
+                    children: [
+                      IconButton(
+                        iconSize: 8, // Further reduced icon size
+                        icon: const Icon(Icons.remove, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            if (_quantity > 1) {
+                              _quantity--;
+                            }
+                          });
+                        },
+                      ),
+                      Text(
+                        '$_quantity',
+                        style: const TextStyle(color: Colors.white, fontSize: 12), // Reduced font size for quantity text
+                      ),
+                      IconButton(
+                        iconSize: 10, // Further reduced icon size
+                        icon: const Icon(Icons.add, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            _quantity++;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
+          // Name and Price (Expanded column)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   widget.price,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
+                    fontSize: 14, // Corrected font size for price
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 10),
+          // Like button and count
           Column(
             children: [
               IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: () {
-                  setState(() {
-                    if (_quantity > 1) {
-                      _quantity--; // Decrease quantity
-                    }
-                  });
-                },
+                icon: Icon(
+                  _isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: _isLiked ? Colors.red : Colors.grey,
+                ),
+                onPressed: _toggleLike, // Toggle like state on button press
               ),
-              Text('$_quantity'), // Display current quantity
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  setState(() {
-                    _quantity++; // Increase quantity
-                  });
-                },
-              ),
-            ],
-          ),
-          SizedBox(width: 10),
-          Column(
-            children: [
-              Icon(Icons.favorite, color: Colors.red),
-              Text(widget.likes),
+              Text('$_likes'), // Display the updated like count
             ],
           ),
         ],

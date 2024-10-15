@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tri/cart_page.dart';
-import 'package:tri/hotel_page.dart'; // Import the HotelPage
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth for user info
+import 'package:tri/cart_page.dart'; // Ensure the path to CartPage is correct
+import 'package:tri/hotel_page.dart'; // Ensure the path to HotelPage is correct
 import 'package:tri/favourites_page.dart' as fav_page; // Import FavouritesPage
-import 'package:tri/profile_page.dart' as profile_page; // Import the ProfilePage class
+import 'package:tri/profile_page.dart' as profile_page; // Import ProfilePage
 
 // HomePage class
 class HomePage extends StatefulWidget {
@@ -14,17 +15,44 @@ class HomePage extends StatefulWidget {
 
 // HomePage state class
 class HomePageState extends State<HomePage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance; // FirebaseAuth instance for user data
   int _currentIndex = 1; // Default to Home tab
+  TextEditingController _searchController = TextEditingController();
+  List<String> foodItems = ['Sweets', 'Chinese', 'Pizza', 'Burger', 'Pasta', 'Salad', 'Sushi'];
+  List<String> filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_filterFoodItems);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterFoodItems() {
+    setState(() {
+      String query = _searchController.text.toLowerCase();
+      filteredItems = foodItems
+          .where((item) => item.toLowerCase().contains(query))
+          .toList(); // Filter the items based on the query
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    User? user = _auth.currentUser; // Get the current logged-in user
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Hi, Bhuvya',
-          style: TextStyle(
+        title: Text(
+          'Hi, ${user?.displayName ?? 'User'}', // Dynamically greet the user by name
+          style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 24,
@@ -37,7 +65,7 @@ class HomePageState extends State<HomePage> {
               // Navigate to CartPage when the cart button is pressed
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CartPage()),
+                MaterialPageRoute(builder: (context) => const CartPage()),
               );
             },
           ),
@@ -56,8 +84,9 @@ class HomePageState extends State<HomePage> {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
                     icon: Icon(Icons.search, color: Colors.grey),
                     hintText: 'Search',
                     border: InputBorder.none,
@@ -66,16 +95,41 @@ class HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 16.0),
 
-              // Horizontal list of food images
+              // Display filtered food items based on search input
+              if (filteredItems.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredItems.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(filteredItems[index]),
+                      onTap: () {
+                        // Navigate to HotelPage or handle search result tap
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HotelPage(),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+              else if (_searchController.text.isNotEmpty)
+                const Text("No results found"), // Display no results message when search has no matches
+
+              const SizedBox(height: 20.0),
+
+              // Horizontal list of triangular food images (like stories)
               SizedBox(
-                height: 100,
+                height: 120,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    _buildFoodImage('assets/food1.png'),
-                    _buildFoodImage('assets/food2.png'),
-                    _buildFoodImage('assets/food3.png'),
-                    _buildFoodImage('assets/food4.png'),
+                    _buildTriangularFoodImage('assets/food1.png'),
+                    _buildTriangularFoodImage('assets/food2.png'),
+                    _buildTriangularFoodImage('assets/food3.png'),
+                    _buildTriangularFoodImage('assets/food4.png'),
                   ],
                 ),
               ),
@@ -88,7 +142,7 @@ class HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HotelPage(), // Pass data if needed
+                      builder: (context) => const HotelPage(),
                     ),
                   );
                 },
@@ -106,7 +160,7 @@ class HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HotelPage(), // Pass data if needed
+                      builder: (context) => const HotelPage(),
                     ),
                   );
                 },
@@ -124,7 +178,7 @@ class HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HotelPage(), // Pass data if needed
+                      builder: (context) => const HotelPage(),
                     ),
                   );
                 },
@@ -180,21 +234,76 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  // Helper method to build food images
-  Widget _buildFoodImage(String assetPath) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Image.asset(
-          assetPath,
-          width: 100,
-          height: 100,
-          fit: BoxFit.cover,
+  // Helper method to build triangular food images
+  Widget _buildTriangularFoodImage(String assetPath) {
+    return GestureDetector(
+      onTap: () {
+        // Show the pop-up when an image is clicked
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.orange,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Image.asset(
+                            assetPath,
+                            fit: BoxFit.cover,
+                            height: 200,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 10.0),
+        child: ClipPath(
+          clipper: TriangleClipper(), // Clip the image into a triangle shape
+          child: Image.asset(
+            assetPath,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
   }
+}
+
+// Custom clipper for triangle shape
+class TriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.moveTo(size.width / 2, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 // Restaurant card widget

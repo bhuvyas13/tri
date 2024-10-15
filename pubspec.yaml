@@ -13,6 +13,8 @@ dependencies:
   cloud_firestore: ^5.4.4
   firebase_auth: ^5.3.1
   firebase_core: 3.6.0  # Ensure Firebase core is added for Firebase initialization
+  font_awesome_flutter: ^10.0.0 # Added font_awesome_flutter package
+  intl: ^0.17.0  # Added intl package for date formatting
 
 dev_dependencies:
   flutter_test:
@@ -34,4 +36,10 @@ flutter:
     - assets/restaurant3.png
     - assets/red_sauce_pasta.png
     - assets/chocolate_cake.png
-    - assets/chicken_tikka.png # Ensure this path and file exist in your project
+    - assets/chicken_tikka.png
+    - assets/facebook.png
+    - assets/whatsapp.png
+    - assets/pinterest.png
+    - assets/snapchat.png
+    - assets/telegram.png
+    - assets/instagram.png
