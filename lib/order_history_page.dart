@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'profile_page.dart'; // Import the ProfilePage
 
 class OrderHistoryPage extends StatelessWidget {
   const OrderHistoryPage({super.key});
@@ -14,7 +15,10 @@ class OrderHistoryPage extends StatelessWidget {
         leading: IconButton( // Adding a back button
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // Go back to the previous page (Profile Page)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfilePage()),
+            ); // Navigate back to the ProfilePage without leaving a white screen
           },
         ),
         title: const Text(

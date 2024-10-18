@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart'; // Firebase package
-import 'favourites_page.dart' as favourites_page; // Import FavouritesPage
-import 'home_page.dart' as home_page; // Import HomePage
-import 'profile_page.dart'; // Import ProfilePage
-import 'login_signup_page.dart'; // Import LoginPage
-import 'cart_page.dart'; 
-import 'hotel_page.dart';// Import CartPage
-import 'models/cart_model.dart'; // CartModel for the provider
+import 'package:firebase_core/firebase_core.dart';
+import 'favourites_page.dart' as favourites_page;
+import 'home_page.dart' as home_page;
+import 'profile_page.dart';
+import 'login_signup_page.dart';
+import 'cart_page.dart';
+import 'hotel_page.dart';
+import 'models/cart_model.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -16,7 +16,7 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartModel(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -27,15 +27,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Remove debug banner
+      debugShowCheckedModeBanner: false,
       initialRoute: '/login', // Set LoginPage as the initial route
       routes: {
-        '/home': (context) => home_page.HomePage(), // Use HomePage() as a widget constructor
-        '/profile': (context) => ProfilePage(), // Use ProfilePage() as a widget constructor
-        '/favourites': (context) => favourites_page.FavouritesPage(), // Use FavouritesPage() as a widget constructor
-        '/cart': (context) => CartPage(), // Use CartPage() as a widget constructor
-        '/login': (context) => LoginPage(), // Use LoginPage() as a widget constructor
-        '/hotel': (context) => HotelPage(), // Add your HotelPage here
+        '/home': (context) => home_page.HomePage(), // HomePage route
+        '/profile': (context) => ProfilePage(), // ProfilePage route
+        '/favourites': (context) => favourites_page.FavouritesPage(), // FavouritesPage route
+        '/cart': (context) => CartPage(), // CartPage route
+        '/login': (context) => LoginPage(), // LoginPage route
+        '/hotel': (context) => HotelPage(), // HotelPage route
       },
     );
   }

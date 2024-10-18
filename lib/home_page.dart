@@ -5,7 +5,6 @@ import 'package:tri/hotel_page.dart'; // Ensure the path to HotelPage is correct
 import 'package:tri/favourites_page.dart' as fav_page; // Import FavouritesPage
 import 'package:tri/profile_page.dart' as profile_page; // Import ProfilePage
 
-// HomePage class
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -13,23 +12,37 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-// HomePage state class
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance; // FirebaseAuth instance for user data
   int _currentIndex = 1; // Default to Home tab
   TextEditingController _searchController = TextEditingController();
   List<String> foodItems = ['Sweets', 'Chinese', 'Pizza', 'Burger', 'Pasta', 'Salad', 'Sushi'];
   List<String> filteredItems = [];
 
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+
     _searchController.addListener(_filterFoodItems);
+
+    // Initialize Animation Controller
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _animationController.dispose(); // Dispose the animation controller
     super.dispose();
   }
 
@@ -40,6 +53,10 @@ class HomePageState extends State<HomePage> {
           .where((item) => item.toLowerCase().contains(query))
           .toList(); // Filter the items based on the query
     });
+  }
+
+  void _onCardTap() {
+    _animationController.forward().then((value) => _animationController.reverse());
   }
 
   @override
@@ -77,8 +94,9 @@ class HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search bar
-              Container(
+              // Animated Search bar
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
@@ -101,17 +119,23 @@ class HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   itemCount: filteredItems.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(filteredItems[index]),
-                      onTap: () {
-                        // Navigate to HotelPage or handle search result tap
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HotelPage(),
-                          ),
-                        );
-                      },
+                    return FadeTransition(
+                      opacity: CurvedAnimation(
+                        parent: _animationController,
+                        curve: Curves.easeIn,
+                      ),
+                      child: ListTile(
+                        title: Text(filteredItems[index]),
+                        onTap: () {
+                          // Navigate to HotelPage or handle search result tap
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HotelPage(),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 )
@@ -135,59 +159,26 @@ class HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20.0),
 
-              // Restaurant list
-              GestureDetector(
-                onTap: () {
-                  // Navigate to HotelPage when this restaurant is clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HotelPage(),
-                    ),
-                  );
-                },
-                child: const RestaurantCard(
-                  image: 'assets/restaurant1.png',
-                  name: 'Ekaant',
-                  status: 'Open',
-                  time: '30-35 mins',
-                ),
+              // Restaurant list with animation
+              _buildAnimatedRestaurantCard(
+                image: 'assets/restaurant1.png',
+                name: 'Ekaant',
+                status: 'Open',
+                time: '30-35 mins',
               ),
               const SizedBox(height: 10.0),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to HotelPage when this restaurant is clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HotelPage(),
-                    ),
-                  );
-                },
-                child: const RestaurantCard(
-                  image: 'assets/restaurant2.png',
-                  name: 'Antariksh',
-                  status: 'Closed',
-                  time: '50-55 mins',
-                ),
+              _buildAnimatedRestaurantCard(
+                image: 'assets/restaurant2.png',
+                name: 'Antariksh',
+                status: 'Closed',
+                time: '50-55 mins',
               ),
               const SizedBox(height: 10.0),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to HotelPage when this restaurant is clicked
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HotelPage(),
-                    ),
-                  );
-                },
-                child: const RestaurantCard(
-                  image: 'assets/restaurant3.png',
-                  name: 'Aashirwad',
-                  status: 'Open',
-                  time: '30-35 mins',
-                ),
+              _buildAnimatedRestaurantCard(
+                image: 'assets/restaurant3.png',
+                name: 'Aashirwad',
+                status: 'Open',
+                time: '30-35 mins',
               ),
             ],
           ),
@@ -234,7 +225,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  // Helper method to build triangular food images
+  // Helper method to build triangular food images with fade animation
   Widget _buildTriangularFoodImage(String assetPath) {
     return GestureDetector(
       onTap: () {
@@ -274,16 +265,36 @@ class HomePageState extends State<HomePage> {
           },
         );
       },
-      child: Container(
-        margin: const EdgeInsets.only(right: 10.0),
-        child: ClipPath(
-          clipper: TriangleClipper(), // Clip the image into a triangle shape
-          child: Image.asset(
-            assetPath,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          ),
+      child: FadeInImage(
+        placeholder: AssetImage(assetPath), // Fade in effect for images
+        image: AssetImage(assetPath),
+        fadeInDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  // Helper method to build animated restaurant cards
+  Widget _buildAnimatedRestaurantCard({
+    required String image,
+    required String name,
+    required String status,
+    required String time,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        _onCardTap();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HotelPage()),
+        );
+      },
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: RestaurantCard(
+          image: image,
+          name: name,
+          status: status,
+          time: time,
         ),
       ),
     );

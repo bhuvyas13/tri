@@ -12,9 +12,11 @@ dependencies:
   provider: ^6.0.0
   cloud_firestore: ^5.4.4
   firebase_auth: ^5.3.1
-  firebase_core: 3.6.0  # Ensure Firebase core is added for Firebase initialization
-  font_awesome_flutter: ^10.0.0 # Added font_awesome_flutter package
-  intl: ^0.17.0  # Added intl package for date formatting
+  firebase_core: ^3.6.0  # Firebase core is needed for Firebase services
+  font_awesome_flutter: ^10.0.0  # Added font_awesome_flutter for icons
+  intl: ^0.17.0  # Added intl for date formatting
+  flutter_animate: ^4.5.0  # Add flutter_animate package for animations
+  flutter_spinkit: ^5.1.0  # Add flutter_spinkit package for loading animations
 
 dev_dependencies:
   flutter_test:
